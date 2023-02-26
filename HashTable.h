@@ -24,7 +24,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<std::forward_list<ValueType>>> _bucket;
-    std::list<ValueType> _input_order;  // new member
+    std::list<ValueType*> _input_order;  // new member
     HashFunction _hasher;
 
 private:
@@ -51,21 +51,22 @@ HashTable<ValueType, HashFunction>::HashTable(std::initializer_list<ValueType> v
 
 template <typename ValueType, typename HashFunction>
 HashTable<ValueType, HashFunction>::HashTable(const HashTable<ValueType, HashFunction>& other) {
-    _bucket.reserve(other._bucket.size());
-    std::ranges::for_each(other._bucket, [this](const std::unique_ptr<std::forward_list<ValueType>>& ptr){
-        if(ptr) {
-            _bucket.emplace_back(std::make_unique<std::forward_list<ValueType>>(*ptr));
-        } else {
-            _bucket.emplace_back(std::unique_ptr<std::forward_list<ValueType>>());
+    _bucket.resize(other._bucket.size());
+    for (const auto& element : other._input_order) {
+        auto& ptr = resolvePtr(*element);
+        if (!ptr) {
+            ptr = std::make_unique<std::forward_list<ValueType>>();
         }
-    });
-    _input_order = other._input_order;  // new line
+        ptr->push_front(*element);
+        auto& new_element = ptr->front();
+        _input_order.emplace_back(&new_element);
+    }
 }
 
 template <typename ValueType, typename HashFunction>
 void HashTable<ValueType, HashFunction>::clear() {
     _bucket.clear();  // modified
-    _bucket.resize(_init_size);  // modified
+    // _bucket.resize(_init_size);  // modified
     _input_order.clear();  // new line
 }
 
@@ -88,7 +89,8 @@ void HashTable<ValueType, HashFunction>::insert(const ValueType& value) {
         ptr = std::make_unique<std::forward_list<ValueType>>();
     }
     ptr->push_front(value);
-    _input_order.push_back(value);  // new line
+    auto& inserted_element = ptr->front();
+    _input_order.push_back(&inserted_element);
 }
 
 template <typename ValueType, typename HashFunction>
@@ -100,7 +102,14 @@ void HashTable<ValueType, HashFunction>::remove(const ValueType& value) {
     if (ptr->empty()) {
         ptr.reset();
     }
-    _input_order.remove(value);  // new line
+    
+    for (auto it = _input_order.begin(); it != _input_order.end(); ++it) {
+        
+        if (!ptr->empty() && *it == &(*ptr->begin())) {
+            _input_order.erase(it);
+            break;
+        }
+    }
 }
 
 template <typename ValueType, typename HashFunction>
