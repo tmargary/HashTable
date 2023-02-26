@@ -6,4 +6,4 @@ HashTable that preserves the order of inserts
 2. `cd HashTable`
 3. `cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=[path to vcpkg]/scripts/buildsystems/vcpkg.cmake`
 4. `cmake --build ./build`
-5. `.main`
+5. `./main`
