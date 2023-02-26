@@ -15,9 +15,4 @@ int main() {
 
     t.for_each([](const auto& v) { std::cout << v << " "; });
 
-    std::cout<<"\n\n\n\n";
-    HashTable<std::string, std::hash<std::string>> t2 = t;
-        t.clear();
-    t2.for_each([](const auto& v) { std::cout << v << " "; });
-
 }
