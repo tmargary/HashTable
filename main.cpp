@@ -8,7 +8,7 @@
 #include "HashTable.h"
 
 int main()
-{
+{//
     HashTable<std::string, std::hash<std::string>> t;
     for (int i = 0; i < 200; i++)
     {
